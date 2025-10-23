@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodeapp-test
+  namespace: nodeapp-test
+  labels:
+    app: nodeapp-test
+
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: nodeapp-test
+  template:
+    metadata:
+      labels:
+        app: nodeapp-test
+
+    spec:
+#       affinity:
+#         nodeAffinity:
+#           requiredDuringSchedulingIgnoredDuringExecution:
+#             nodeSelectorTerms:
+#             - matchExpressions:
+#               - key: disktype
+#                 operator: In
+#                 values:
+#                 - ssd
+#           preferredDuringSchedulingIgnoredDuringExecution:
+#           - weight: 1
+#             preference:
+#               matchExpressions:
+#               - key: topology.kubernetes.io/zone
+#                 operator: In
+#                 values:
+#                 - ap-south-1a
+#                 - ap-south-1b
+
+      containers:
+      - name: nodeapp-test
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        ports:
+        - containerPort: 8080
+
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+          timeoutSeconds: 3
+          failureThreshold: 3
+
+        volumeMounts:
+        - mountPath: /var/nodeapp/data
+          name: nodeapp-vol
+
+      volumes:
+      - name: nodeapp-vol
+        persistentVolumeClaim:
+          claimName: nodeapp-pvc
+

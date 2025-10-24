@@ -4,6 +4,7 @@ metadata:
   name: nodeapp-test
   namespace: nodeapp-test
 spec:
+  type: NodePort
   selector:
     app: nodeapp-test
   ports:

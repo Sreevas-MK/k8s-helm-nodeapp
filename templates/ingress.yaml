@@ -1,43 +1,20 @@
-{{- if .Values.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "nodeapp.fullname" . }}
-  labels:
-    {{- include "nodeapp.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
+  name: nodeapp-ingress
+  namespace: nodeapp-test
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  {{- with .Values.ingress.className }}
-  ingressClassName: {{ . }}
-  {{- end }}
-  {{- if .Values.ingress.tls }}
-  tls:
-    {{- range .Values.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
-  {{- end }}
+  ingressClassName: nginx
   rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
+    - http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- with .pathType }}
-            pathType: {{ . }}
-            {{- end }}
-            backend:
-              service:
-                name: {{ include "nodeapp.fullname" $ }}
-                port:
-                  number: {{ $.Values.service.port }}
-          {{- end }}
-    {{- end }}
-{{- end }}
+        - path: /
+          pathType: Prefix
+          backend:
+            service:
+              name: nodeapp-test
+              port:
+                number: 8080
+

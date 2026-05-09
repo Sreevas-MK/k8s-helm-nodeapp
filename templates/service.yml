@@ -4,7 +4,7 @@ metadata:
   name: nodeapp-test
   namespace: nodeapp-test
 spec:
-  type: LoadBalancer
+  type: NodePort
   sessionAffinity: None
   selector:
     app: nodeapp-test
